@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.gmall.product.mapper.SpuSaleAttrMapper">
+
+    <sql id="sqlList">
+        ssa.id,
+        ssa.spu_id,
+       ssa.base_sale_attr_id,
+       ssa.sale_attr_name,
+       ssav.id sale_attr_value_id,
+       ssav.sale_attr_value_name
+    </sql>
+    <select id="selectSpuSaleAttrList" resultMap="spuSaleAttrMap" >
+        select
+        <include refid="sqlList"></include>
+        from spu_sale_attr ssa
+        inner join spu_sale_attr_value ssav
+        on ssa.spu_id = ssav.spu_id and ssa.base_sale_attr_id = ssav.base_sale_attr_id
+        where ssa.spu_id = #{spuId}
+    </select>
+    <select id="selectSpuSaleAttrListCheckBySku" resultMap="spuSaleAttrMap">
+        select
+        <include refid="sqlList"></include>,
+        skaa.sku_id,
+        if(skaa.sku_id is null,0,1)is_checked
+        from spu_sale_attr ssa
+        inner join spu_sale_attr_value ssav
+        on   ssa.spu_id = ssav.spu_id and ssa.base_sale_attr_id = ssav.base_sale_attr_id
+        left  join sku_sale_attr_value skaa on ssav.id = skaa.sale_attr_value_id and skaa.sku_id = #{skuId}
+        where ssa.spu_id = #{spuId}
+        order by ssav.base_sale_attr_id,ssav.id;
+    </select>
+
+    <resultMap id="spuSaleAttrMap" type="com.atguigu.gmall.model.product.SpuSaleAttr" autoMapping="true">
+        <id property="id" column="id"></id>
+        <collection property="spuSaleAttrValueList" ofType="com.atguigu.gmall.model.product.SpuSaleAttrValue" autoMapping="true"
+        >
+            <id property="id" column="sale_attr_value_id"></id>
+        </collection>
+    </resultMap>
+</mapper>
